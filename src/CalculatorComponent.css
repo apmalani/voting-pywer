@@ -1,0 +1,25 @@
+.player-table {
+    width: 33%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  .player-table th, .player-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  .new-player-area {
+    padding-left: 0px;
+  }
+  .input-right {
+    text-align: right;
+    width: 60px;
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .quota-input {
+    margin-top: 15px;
+  }
+  .small-input {
+    width: 60px;
+  }

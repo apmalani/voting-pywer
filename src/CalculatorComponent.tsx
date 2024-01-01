@@ -1,4 +1,5 @@
 import React, { useState, ChangeEvent } from 'react';
+import './CalculatorComponent.css';
 
 interface Player {
   name: string;
@@ -260,7 +261,7 @@ const CalculatorComponent: React.FC = () => {
         </tbody>
       </table>
 
-      <div className="container-fluid" style={{ marginLeft: 0, marginRight: 0, width: '39%' }}>
+      <div className="container-fluid" style={{ marginLeft: 0, marginRight: 0, width: '30%' }}>
         <div className="row">
           <div className="col-sm">
             <div className="new-player-area" style={{ paddingTop: '15px' }}>
