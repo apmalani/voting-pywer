@@ -18,110 +18,115 @@ const CalculatorComponent: React.FC = () => {
     ];
     
     const [players, setPlayers] = useState<Player[]>(initialPlayers);
-    const [quota, setQuota] = useState<number | ''>(12);
+    const [quota, setQuota] = useState<number>(12);
     const [errorMsg, setErrorMsg] = useState<string | null>('');
 
-    const isAddPlayerDisabled = !quota || isNaN(Number(quota)) || Number(quota) <= 0;
+    const isAddPlayerDisabled = players.length === 10;
 
-    // const gleanErrors = () => {
-    //     let sum = 0;
-    //     for (let i = 0; i < players.length; i++) {
-    //       sum += players[i].weight;
-    //     }
-      
-    //     if (sum < (quota as number)) {
-    //       setErrorMsg("ERROR: Not enough votes to meet the quota.");
-    //     } else if (players.length === 10) {
-    //       setErrorMsg("WARNING: Max unique players reached.");
-    //     } else {
-    //       setErrorMsg(null);
-    //     }
-    //   };
 
     const addPlayer = () => {
-        const newPlayer: Player = {
-            name: `${players.length + 1}`,
-            weight: 0,
-            banzhaf: 0,
-            shapleyShubik: 0,
-        };
-        setPlayers([...players, newPlayer]);
+      const newPlayer: Player = {
+        name: `${players.length + 1}`,
+        weight: 0,
+        banzhaf: 0,
+        shapleyShubik: 0,
+      };
+    
+      setPlayers((prevPlayers) => {
+        const updatedPlayers = [...prevPlayers, newPlayer];
+        return updatedPlayers;
+      });
+    
+      // Now, calculate after the state has been updated
+      calculateBanzhaf([...players, newPlayer], quota);
+      calculateShapleyShubik([...players, newPlayer], quota);
     };
-
+    
+    
     const deletePlayer = (index: number) => {
-        const updatedPlayers = [...players];
+      setPlayers((prevPlayers) => {
+        const updatedPlayers = [...prevPlayers];
         updatedPlayers.splice(index, 1);
-        setPlayers(updatedPlayers);
+        calculateBanzhaf(updatedPlayers, quota);
+        calculateShapleyShubik(updatedPlayers, quota);
+        return updatedPlayers;
+      });
     };
 
     const weightSum = (coalition: number[]): number => {
-        return coalition.reduce((sum, index) => sum + players[index].weight, 0);
-      };
+      return coalition.reduce((sum, index) => {
+        // Check if players[index] is not undefined before accessing its properties
+        if (players[index] !== undefined) {
+          return sum + players[index].weight;
+        }
+        return sum;
+      }, 0);
+    };
+    
 
-    const calculateBanzhaf = () => {
-        const totalPlayers = players.length;
-        const winningCoalitions: number[][] = [];
-      
-        const weightSumWithoutPlayer = (coalition: number[]): number => {
-          return coalition.reduce((sum, index) => sum + players[index].weight, 0);
-        };
-      
-        // Generate all possible combinations of players (subsets)
-        for (let i = 1; i < (1 << totalPlayers); i++) {
-          const coalition: number[] = [];
-          let weightSum = 0;
-      
-          // Check which players are in the current subset (coalition)
-          for (let j = 0; j < totalPlayers; j++) {
-            if ((i & (1 << j)) !== 0) {
-              coalition.push(j);
-              weightSum += players[j].weight;
-            }
-          }
-      
-          // Check if the coalition is a winning coalition
-          if (weightSum >= (quota as number)) {
-            winningCoalitions.push(coalition);
-          }
-        }
-      
-        // Calculate Banzhaf power for each player
-        const banzhafCounts: number[] = Array.from({ length: totalPlayers }, () => 0);
-      
-        for (const coalition of winningCoalitions) {
-          for (const playerIndex of coalition) {
-            const coalitionWithoutPlayer = coalition.filter((index) => index !== playerIndex);
-      
-            // Check if the player is critical for the coalition
-            if (weightSumWithoutPlayer(coalitionWithoutPlayer) < (quota as number)) {
-              banzhafCounts[playerIndex]++;
-            }
-          }
-        }
-      
-        // Normalize Banzhaf power values
-        const totalCriticalCount = banzhafCounts.reduce((sum, count) => sum + count, 0);
-      
-        for (let i = 0; i < totalPlayers; i++) {
-          if (banzhafCounts[i] === 0) {
-            // Assuming 'players' state is managed using setPlayers
-            setPlayers((prevPlayers) => {
-              const updatedPlayers = [...prevPlayers];
-              updatedPlayers[i].banzhaf = 0;
-              return updatedPlayers;
-            });
-          } else {
-            // Assuming 'players' state is managed using setPlayers
-            setPlayers((prevPlayers) => {
-              const updatedPlayers = [...prevPlayers];
-              updatedPlayers[i].banzhaf = banzhafCounts[i] / totalCriticalCount;
-              return updatedPlayers;
-            });
-          }
-        }
+    const calculateBanzhaf = (updatedPlayers: Player[], quota: number) => {
+      const totalPlayers = updatedPlayers.length;
+      const winningCoalitions: number[][] = [];
+    
+      const weightSumWithoutPlayer = (coalition: number[]): number => {
+        return coalition.reduce((sum, index) => sum + updatedPlayers[index].weight, 0);
       };
+    
+      // Generate all possible combinations of players (subsets)
+      for (let i = 1; i < (1 << totalPlayers); i++) {
+        const coalition: number[] = [];
+        let weightSum = 0;
+    
+        // Check which players are in the current subset (coalition)
+        for (let j = 0; j < totalPlayers; j++) {
+          if ((i & (1 << j)) !== 0) {
+            coalition.push(j);
+            weightSum += updatedPlayers[j].weight;
+          }
+        }
+    
+        // Check if the coalition is a winning coalition
+        if (weightSum >= (quota as number)) {
+          winningCoalitions.push(coalition);
+        }
+      }
+    
+      // Calculate Banzhaf power for each player
+      const banzhafCounts: number[] = Array.from({ length: totalPlayers }, () => 0);
+    
+      for (const coalition of winningCoalitions) {
+        for (const playerIndex of coalition) {
+          const coalitionWithoutPlayer = coalition.filter((index) => index !== playerIndex);
+    
+          // Check if the player is critical for the coalition
+          if (weightSumWithoutPlayer(coalitionWithoutPlayer) < (quota as number)) {
+            banzhafCounts[playerIndex]++;
+          }
+        }
+      }
+    
+      // Normalize Banzhaf power values
+      const totalCriticalCount = banzhafCounts.reduce((sum, count) => sum + count, 0);
+    
+      for (let i = 0; i < totalPlayers; i++) {
+        if (banzhafCounts[i] === 0) {
+          setPlayers((prevPlayers) => {
+            const updatedPlayers = [...prevPlayers];
+            updatedPlayers[i].banzhaf = 0;
+            return updatedPlayers;
+          });
+        } else {
+          setPlayers((prevPlayers) => {
+            const updatedPlayers = [...prevPlayers];
+            updatedPlayers[i].banzhaf = banzhafCounts[i] / totalCriticalCount;
+            return updatedPlayers;
+          });
+        }
+      }
+    };
+    
 
-      const isCrucial = (coalition: number[], playerI: number): boolean => {
+      const isCrucial = (coalition: number[], playerI: number, quota: number): boolean => {
         const weightSumWithoutPlayerI = weightSum(coalition);
         const coalitionWithPlayerI = [...coalition, playerI];
         const weightSumWithPlayerI = weightSum(coalitionWithPlayerI);
@@ -129,7 +134,7 @@ const CalculatorComponent: React.FC = () => {
         return weightSumWithoutPlayerI < (quota as number) && weightSumWithPlayerI >= (quota as number);
       };
       
-      const calculateShapleyShubik = () => {
+      const calculateShapleyShubik = (players: Player[], quota: number) => {
         const totalPlayers = players.length;
         const shapleyShubikValues: number[] = Array.from({ length: totalPlayers }, () => 0);
       
@@ -164,7 +169,7 @@ const CalculatorComponent: React.FC = () => {
       
             // Check if the player is pivotal
             if (players[i].weight > 0) {
-              if (isCrucial(coalitionWithoutPlayerI, i)) {
+              if (isCrucial(coalitionWithoutPlayerI, i, quota)) {
                 shapleyShubikValues[i] += 1;
               }
             }
@@ -172,7 +177,7 @@ const CalculatorComponent: React.FC = () => {
         }
       
         // Step 4: Convert counts to fractions or decimals
-        const totalSequentialCoalitions = factorial(totalPlayers);
+        const totalSequentialCoalitions = factorial(players.length);
       
         for (let i = 0; i < totalPlayers; i++) {
           setPlayers((prevPlayers) => {
@@ -188,20 +193,34 @@ const CalculatorComponent: React.FC = () => {
       };
       
 
-    const onWeightChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {
-        const updatedPlayers = [...players];
-        updatedPlayers[index].weight = Number(event.target.value);
-        calculateBanzhaf();
-        calculateShapleyShubik();
-        setPlayers(updatedPlayers);
-    };
-
-    const onQuotaChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const newQuota = event.target.value;
-        setQuota(newQuota as number | '');
-        calculateBanzhaf();
-        calculateShapleyShubik();
-    };
+      const onWeightChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {
+        setPlayers((prevPlayers) => {
+          const updatedPlayers = [...prevPlayers];
+          updatedPlayers[index].weight = Number(event.target.value);
+          calculateBanzhaf(updatedPlayers, quota);
+          calculateShapleyShubik(updatedPlayers, quota);
+          return updatedPlayers;
+        });
+      };
+      
+      const onQuotaChange = (event: ChangeEvent<HTMLInputElement>) => {
+        const newQuota = isNaN(Number(event.target.value)) ? 0 : Number(event.target.value);
+      
+        setQuota((prevQuota) => {
+          // Calculate Banzhaf and ShapleyShubik with the updated quota
+          calculateShapleyShubik(players, newQuota);
+          calculateBanzhaf(players, newQuota);
+      
+          // Log the updated quota
+          console.log(newQuota);
+      
+          // Return the new value for the state
+          return newQuota;
+        });
+      };
+      
+      
+          
 
     return (
     <div style={{ paddingLeft: '15px' }}>
@@ -264,7 +283,7 @@ const CalculatorComponent: React.FC = () => {
               </label>
               <input
                 type="number"
-                value={quota}
+                value={quota === 0 ? '' : quota}
                 id="quota"
                 className="small-input"
                 onChange={onQuotaChange}
