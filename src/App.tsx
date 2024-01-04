@@ -17,7 +17,7 @@ function App() {
       <Router>
         <Routes>
           <Route path = "/voting-pywer" element = {<HomeComponent/>}></Route>
-          <Route path = "/about" element = {<AboutPage/>}></Route>
+          <Route path = "/voting-pywer/about" element = {<AboutPage/>}></Route>
         </Routes>
       </Router>
     </div>

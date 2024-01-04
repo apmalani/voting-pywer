@@ -37,7 +37,7 @@ const HeaderComponent: React.FC = () => {
         <Navbar.Toggle aria-controls="navbarNav" />
         <Navbar.Collapse id="navbarNav">
             <Nav className="mr-auto">
-            <Nav.Link href="/about">About</Nav.Link>
+            <Nav.Link href="/voting-pywer/about">About</Nav.Link>
             </Nav>
             <Nav>
             <NavDropdown title="Settings" id="basic-nav-dropdown">
