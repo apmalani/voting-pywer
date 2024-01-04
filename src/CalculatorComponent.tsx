@@ -1,5 +1,6 @@
 import React, { useState, ChangeEvent } from 'react';
 import './CalculatorComponent.css';
+import { Button, Form, Table } from 'react-bootstrap';
 
 interface Player {
   name: string;
@@ -224,7 +225,7 @@ const CalculatorComponent: React.FC = () => {
           
 
     return (
-    <div style={{ paddingLeft: '15px' }}>
+      <div style={{ paddingLeft: '15px' }}>
       <div style={{ display: players.length === 0 ? 'block' : 'none' }}>
         No players added yet.
       </div>
