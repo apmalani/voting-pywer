@@ -14,12 +14,10 @@ function App() {
   
   return (
     <div className="App">
-      <HashRouter basename='/voting-pywer'>
         <Routes>
           <Route path = "/" element = {<HomeComponent/>}></Route>
           <Route path = "/about" element = {<AboutPage/>}></Route>
         </Routes>
-      </HashRouter>
     </div>
 
 
