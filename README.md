@@ -1,6 +1,6 @@
 # Voting Pywer
 
-[apmalani.github.io/voting-pywer/](https://apmalani.github.io/voting-pywer)
+[**apmalani.github.io/voting-pywer/**](https://apmalani.github.io/voting-pywer)
 
 Arun Malani
 

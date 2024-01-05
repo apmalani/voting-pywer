@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Router, Route, Routes, BrowserRouter, HashRouter } from 'react-router-dom';
+import { Router, Route, Routes, HashRouter } from 'react-router-dom';
 import logo from './logo.svg';
 import './App.css';
 import CalculatorComponent from './CalculatorComponent';
