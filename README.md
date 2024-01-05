@@ -1,46 +1,21 @@
-# Getting Started with Create React App
+# Voting Pywer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Arun Malani
 
-## Available Scripts
+## About
 
-In the project directory, you can run:
+Voting Pywer was developed to improve upon Powerslave Mark II, a similar tool developed by the University of Turku. Mark II was last updated in 2016, and was moved to a virtual server in 2021.
+It features a much cleaner user interface, as well as the ability to calculate more than 2000 individual votes and 10 unique parties simultaneously.
+Voting Pywer currently calculates two power indices, however more are soon to be implemented. The two currently implemented are the Banzhaf and Shapley-Shubik power indices, which are both commonly used in voting theory.
+For other indices, as well as more in-depth explanations of the indices and the math behind them, please visit Mark II's site.
 
-### `npm start`
+### Indices
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+The Banzhaf voting power index is calculated for a voter "v" by dividing the number of times "v" is critical by the total number of times all voters are critical.
+The Shapley-Shubik voting power index is calculated for a voter "v" by dividing the number of times "v" is pivotal by the total number of sequential coalitions.
+The words "critical" and "pivotal" are almost interchangeable. Here, voter "v" is "critical" for a winning coalition if, without "v", the coalition is losing.
+Similarly, voter "v" is pivotal if joining a sequential coalition (a coaliton in which each party joins as the sequence is written out) causes the coalition to go from losing to winning.
+Essentially, critical/pivotal parties cause losing coalitions to become winning coalitions when they join, and vice versa when they leave.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Note: As mentioned, Voting Pywer currently allows for 10 distinct parties. This number will hopefully go up if I am able to get the site hosted on my university's servers. At the max of 10 parties, calculations may take a few seconds, so please be patient.
+Many thanks to the developers of Powerslave and to Professor Kaminski.
