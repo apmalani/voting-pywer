@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, BrowserRouter } from 'react-router-dom';
+import { Router, Route, Routes, BrowserRouter, HashRouter } from 'react-router-dom';
 import logo from './logo.svg';
 import './App.css';
 import CalculatorComponent from './CalculatorComponent';
@@ -14,12 +14,12 @@ function App() {
   
   return (
     <div className="App">
-      <BrowserRouter basename='/voting-pywer'>
+      <HashRouter basename='/voting-pywer'>
         <Routes>
           <Route path = "/" element = {<HomeComponent/>}></Route>
           <Route path = "/about" element = {<AboutPage/>}></Route>
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </div>
 
 
