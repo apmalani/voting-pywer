@@ -38,6 +38,7 @@ const AboutPage = () => {
                     <br/>
                     <br/>
                     Note: As mentioned, Voting Pywer currently allows for 10 distinct parties. This number will hopefully go up if I am able to get the site hosted on my university's servers.
+                    <br/>
                     At the max of 10 parties, calculations may take a few seconds, so please be patient.
                     <br/>
                     Many thanks to the developers of Powerslave and to Professor Kaminski.
