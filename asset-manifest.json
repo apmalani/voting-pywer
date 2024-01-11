@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/voting-pywer/static/css/main.58bd803e.css",
-    "main.js": "/voting-pywer/static/js/main.0bb4cc7b.js",
+    "main.js": "/voting-pywer/static/js/main.a1fbc658.js",
     "static/js/787.be48f827.chunk.js": "/voting-pywer/static/js/787.be48f827.chunk.js",
     "index.html": "/voting-pywer/index.html",
     "main.58bd803e.css.map": "/voting-pywer/static/css/main.58bd803e.css.map",
-    "main.0bb4cc7b.js.map": "/voting-pywer/static/js/main.0bb4cc7b.js.map",
+    "main.a1fbc658.js.map": "/voting-pywer/static/js/main.a1fbc658.js.map",
     "787.be48f827.chunk.js.map": "/voting-pywer/static/js/787.be48f827.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.58bd803e.css",
-    "static/js/main.0bb4cc7b.js"
+    "static/js/main.a1fbc658.js"
   ]
 }
