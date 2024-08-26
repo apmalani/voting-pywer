@@ -1,6 +1,8 @@
 import React, { useState, ChangeEvent } from 'react';
 import './CalculatorComponent.css';
 import { Button, Form, Table } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
 interface Player {
   name: string;
@@ -25,7 +27,6 @@ const CalculatorComponent: React.FC = () => {
 
     const isAddPlayerDisabled = players.length === 10;
 
-
     const addPlayer = () => {
       const newPlayer: Player = {
         name: `${players.length + 1}`,
@@ -36,19 +37,15 @@ const CalculatorComponent: React.FC = () => {
     
       setPlayers((prevPlayers) => {
         const updatedPlayers = [...prevPlayers, newPlayer];
+        calculateBanzhaf(updatedPlayers, quota);
+        calculateShapleyShubik(updatedPlayers, quota);
         return updatedPlayers;
       });
-    
-      // Now, calculate after the state has been updated
-      calculateBanzhaf([...players, newPlayer], quota);
-      calculateShapleyShubik([...players, newPlayer], quota);
     };
-    
     
     const deletePlayer = (index: number) => {
       setPlayers((prevPlayers) => {
-        const updatedPlayers = [...prevPlayers];
-        updatedPlayers.splice(index, 1);
+        const updatedPlayers = prevPlayers.filter((_, i) => i !== index);
         calculateBanzhaf(updatedPlayers, quota);
         calculateShapleyShubik(updatedPlayers, quota);
         return updatedPlayers;
@@ -57,14 +54,9 @@ const CalculatorComponent: React.FC = () => {
 
     const weightSum = (coalition: number[]): number => {
       return coalition.reduce((sum, index) => {
-        // Check if players[index] is not undefined before accessing its properties
-        if (players[index] !== undefined) {
-          return sum + players[index].weight;
-        }
-        return sum;
+        return sum + (players[index]?.weight || 0);
       }, 0);
     };
-    
 
     const calculateBanzhaf = (updatedPlayers: Player[], quota: number) => {
       const totalPlayers = updatedPlayers.length;
@@ -74,12 +66,10 @@ const CalculatorComponent: React.FC = () => {
         return coalition.reduce((sum, index) => sum + updatedPlayers[index].weight, 0);
       };
     
-      // Generate all possible combinations of players (subsets)
       for (let i = 1; i < (1 << totalPlayers); i++) {
         const coalition: number[] = [];
         let weightSum = 0;
     
-        // Check which players are in the current subset (coalition)
         for (let j = 0; j < totalPlayers; j++) {
           if ((i & (1 << j)) !== 0) {
             coalition.push(j);
@@ -87,215 +77,175 @@ const CalculatorComponent: React.FC = () => {
           }
         }
     
-        // Check if the coalition is a winning coalition
-        if (weightSum >= (quota as number)) {
+        if (weightSum >= quota) {
           winningCoalitions.push(coalition);
         }
       }
     
-      // Calculate Banzhaf power for each player
       const banzhafCounts: number[] = Array.from({ length: totalPlayers }, () => 0);
     
       for (const coalition of winningCoalitions) {
         for (const playerIndex of coalition) {
           const coalitionWithoutPlayer = coalition.filter((index) => index !== playerIndex);
     
-          // Check if the player is critical for the coalition
-          if (weightSumWithoutPlayer(coalitionWithoutPlayer) < (quota as number)) {
+          if (weightSumWithoutPlayer(coalitionWithoutPlayer) < quota) {
             banzhafCounts[playerIndex]++;
           }
         }
       }
     
-      // Normalize Banzhaf power values
       const totalCriticalCount = banzhafCounts.reduce((sum, count) => sum + count, 0);
     
-      for (let i = 0; i < totalPlayers; i++) {
-        if (banzhafCounts[i] === 0) {
-          setPlayers((prevPlayers) => {
-            const updatedPlayers = [...prevPlayers];
-            updatedPlayers[i].banzhaf = 0;
-            return updatedPlayers;
-          });
-        } else {
-          setPlayers((prevPlayers) => {
-            const updatedPlayers = [...prevPlayers];
-            updatedPlayers[i].banzhaf = banzhafCounts[i] / totalCriticalCount;
-            return updatedPlayers;
-          });
-        }
-      }
+      setPlayers((prevPlayers) => 
+        prevPlayers.map((player, i) => ({
+          ...player,
+          banzhaf: totalCriticalCount > 0 ? banzhafCounts[i] / totalCriticalCount : 0
+        }))
+      );
+    };
+
+    const isCrucial = (coalition: number[], playerI: number, quota: number): boolean => {
+      const weightSumWithoutPlayerI = weightSum(coalition);
+      const coalitionWithPlayerI = [...coalition, playerI];
+      const weightSumWithPlayerI = weightSum(coalitionWithPlayerI);
+    
+      return weightSumWithoutPlayerI < quota && weightSumWithPlayerI >= quota;
     };
     
-
-      const isCrucial = (coalition: number[], playerI: number, quota: number): boolean => {
-        const weightSumWithoutPlayerI = weightSum(coalition);
-        const coalitionWithPlayerI = [...coalition, playerI];
-        const weightSumWithPlayerI = weightSum(coalitionWithPlayerI);
-      
-        return weightSumWithoutPlayerI < (quota as number) && weightSumWithPlayerI >= (quota as number);
+    const calculateShapleyShubik = (players: Player[], quota: number) => {
+      const totalPlayers = players.length;
+      const shapleyShubikValues: number[] = Array.from({ length: totalPlayers }, () => 0);
+    
+      const factorial = (n: number): number => {
+        return n <= 1 ? 1 : n * factorial(n - 1);
       };
-      
-      const calculateShapleyShubik = (players: Player[], quota: number) => {
-        const totalPlayers = players.length;
-        const shapleyShubikValues: number[] = Array.from({ length: totalPlayers }, () => 0);
-      
-        const factorial = (n: number): number => {
-          return n <= 1 ? 1 : n * factorial(n - 1);
-        };
-      
-        // Step 1: List all sequential coalitions
-        const sequentialCoalitions: number[][] = [];
-      
-        // Generate all permutations (orderings) of players
-        const generateAllPermutations = (players: number[]): void => {
-          if (players.length === totalPlayers) {
-            sequentialCoalitions.push([...players]);
-            return;
-          }
-      
-          for (let i = 0; i < totalPlayers; i++) {
-            if (!players.includes(i)) {
-              generateAllPermutations([...players, i]);
-            }
-          }
-        };
-      
-        generateAllPermutations([]);
-      
-        // Step 2 and 3: Determine pivotal player in each sequential coalition
-        for (const coalition of sequentialCoalitions) {
-          for (let i = 0; i < totalPlayers; i++) {
-            const positionI = coalition.indexOf(i) + 1;
-            const coalitionWithoutPlayerI = coalition.slice(0, positionI - 1);
-      
-            // Check if the player is pivotal
-            if (players[i].weight > 0) {
-              if (isCrucial(coalitionWithoutPlayerI, i, quota)) {
-                shapleyShubikValues[i] += 1;
-              }
-            }
-          }
+    
+      const sequentialCoalitions: number[][] = [];
+    
+      const generateAllPermutations = (players: number[]): void => {
+        if (players.length === totalPlayers) {
+          sequentialCoalitions.push([...players]);
+          return;
         }
-      
-        // Step 4: Convert counts to fractions or decimals
-        const totalSequentialCoalitions = factorial(players.length);
-      
+    
         for (let i = 0; i < totalPlayers; i++) {
-          setPlayers((prevPlayers) => {
-            const updatedPlayers = [...prevPlayers];
-            if (shapleyShubikValues[i] === 0) {
-              updatedPlayers[i].shapleyShubik = 0;
-            } else {
-              updatedPlayers[i].shapleyShubik = shapleyShubikValues[i] / totalSequentialCoalitions;
-            }
-            return updatedPlayers;
-          });
+          if (!players.includes(i)) {
+            generateAllPermutations([...players, i]);
+          }
         }
       };
-      
+    
+      generateAllPermutations([]);
+    
+      for (const coalition of sequentialCoalitions) {
+        for (let i = 0; i < totalPlayers; i++) {
+          const positionI = coalition.indexOf(i) + 1;
+          const coalitionWithoutPlayerI = coalition.slice(0, positionI - 1);
+    
+          if (players[i].weight > 0) {
+            if (isCrucial(coalitionWithoutPlayerI, i, quota)) {
+              shapleyShubikValues[i] += 1;
+            }
+          }
+        }
+      }
+    
+      const totalSequentialCoalitions = factorial(players.length);
+    
+      setPlayers((prevPlayers) => 
+        prevPlayers.map((player, i) => ({
+          ...player,
+          shapleyShubik: shapleyShubikValues[i] / totalSequentialCoalitions
+        }))
+      );
+    };
 
-      const onWeightChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {
-        setPlayers((prevPlayers) => {
-          const updatedPlayers = [...prevPlayers];
-          updatedPlayers[index].weight = Number(event.target.value);
-          calculateBanzhaf(updatedPlayers, quota);
-          calculateShapleyShubik(updatedPlayers, quota);
-          return updatedPlayers;
-        });
-      };
-      
-      const onQuotaChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const newQuota = isNaN(Number(event.target.value)) ? 0 : Number(event.target.value);
-      
-        setQuota((prevQuota) => {
-          // Calculate Banzhaf and ShapleyShubik with the updated quota
-          calculateShapleyShubik(players, newQuota);
-          calculateBanzhaf(players, newQuota);
-      
-          // Log the updated quota
-          console.log(newQuota);
-      
-          // Return the new value for the state
-          return newQuota;
-        });
-      };
-      
-      
-          
+    const onWeightChange = (index: number, event: ChangeEvent<HTMLInputElement>) => {
+      const newWeight = Number(event.target.value);
+      setPlayers((prevPlayers) => {
+        const updatedPlayers = prevPlayers.map((player, i) => 
+          i === index ? { ...player, weight: newWeight } : player
+        );
+        calculateBanzhaf(updatedPlayers, quota);
+        calculateShapleyShubik(updatedPlayers, quota);
+        return updatedPlayers;
+      });
+    };
+    
+    const onQuotaChange = (event: ChangeEvent<HTMLInputElement>) => {
+      const newQuota = Number(event.target.value);
+      setQuota(newQuota);
+      calculateBanzhaf(players, newQuota);
+      calculateShapleyShubik(players, newQuota);
+    };
 
     return (
-      <div style={{ paddingLeft: '15px' }}>
-      <div style={{ display: players.length === 0 ? 'block' : 'none' }}>
-        No players added yet.
-      </div>
-
-      <table style={{ display: players.length > 0 ? 'table' : 'none' }} className="player-table">
-        <thead>
-          <tr>
-            <th>Player</th>
-            <th>Weight</th>
-            <th>Banzhaf</th>
-            <th>Shapley-Shubik</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {players.map((player, index) => (
-            <tr key={index}>
-              <td className="text-right">{player.name}</td>
-              <td className="text-right">
-                <input
-                  type="number"
-                  value={player.weight}
-                  className="input-right"
-                  onChange={(event) => onWeightChange(index, event)}
-                />
-              </td>
-              <td className="text-right">{player.banzhaf.toFixed(4)}</td>
-              <td className="text-right">{player.shapleyShubik.toFixed(4)}</td>
-              <td>
-                <button onClick={() => deletePlayer(index)}>Delete</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div className="container-fluid" style={{ marginLeft: 0, marginRight: 0, width: '30%' }}>
-        <div className="row">
-          <div className="col-sm">
-            <div className="new-player-area" style={{ paddingTop: '15px' }}>
-              <button onClick={addPlayer} disabled={isAddPlayerDisabled}>
+      <div className="calculator-container">
+        {players.length === 0 && <div>No players added yet.</div>}
+    
+        {players.length > 0 && (
+          <div className="table-container">
+            <div className="table-header">
+              <h2>Voting Power Calculator</h2>
+            </div>
+    
+            <Table hover className="player-table">
+              <thead>
+                <tr>
+                  <th>Player</th>
+                  <th>Weight</th>
+                  <th>Banzhaf</th>
+                  <th>Shapley-Shubik</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {players.map((player, index) => (
+                  <tr key={index}>
+                    <td>{player.name}</td>
+                    <td>
+                      <Form.Control
+                        type="number"
+                        value={player.weight}
+                        className="input-right"
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => onWeightChange(index, event)}
+                      />
+                    </td>
+                    <td>{player.banzhaf.toFixed(4)}</td>
+                    <td>{player.shapleyShubik.toFixed(4)}</td>
+                    <td>
+                      <Button variant="danger" onClick={() => deletePlayer(index)}>
+                        <FontAwesomeIcon icon={faTrash} />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+    
+            <div className="table-footer">
+              <Button onClick={addPlayer} disabled={isAddPlayerDisabled}>
                 Add Player
-              </button>
-            </div>
-          </div>
+              </Button>
+              <div className="quota-input">
+              <Form.Group controlId="quota" className="form-group">
+                <Form.Label className="form-label">Quota:</Form.Label>
+                <Form.Control
+                  type="number"
+                  value={quota === 0 ? '' : quota}
+                  className="small-input"
+                  onChange={onQuotaChange}
+                />
+              </Form.Group>
 
-          <div className="col-sm">
-            <div className="error-area" style={{ paddingTop: '15px', color: 'red', fontWeight: 'bold' }}>
-              {errorMsg}
+              </div>
             </div>
           </div>
-
-          <div className="col-sm">
-            <div className="quota-input">
-              <label htmlFor="quota" style={{ marginRight: '5px', marginLeft: '0px' }}>
-                Quota:
-              </label>
-              <input
-                type="number"
-                value={quota === 0 ? '' : quota}
-                id="quota"
-                className="small-input"
-                onChange={onQuotaChange}
-              />
-            </div>
-          </div>
-        </div>
+        )}
+    
+        {errorMsg && <div className="error-area">{errorMsg}</div>}
       </div>
-    </div>
-  );
+    );
 };
 
 export default CalculatorComponent;

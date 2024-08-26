@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Navbar, Nav, NavDropdown, Modal, Form, Button } from 'react-bootstrap';
+import './HeaderComponent.css';
 
 const HeaderComponent: React.FC = () => {
 
     const handlePrint = () => {
         window.print();
-      };
+    };
 
     const [showBugReportModal, setShowBugReportModal] = useState(false);
     const [bugDescription, setBugDescription] = useState('');
@@ -23,60 +24,54 @@ const HeaderComponent: React.FC = () => {
     };
 
     const handleSubmitBugReport = () => {
-        // Add your logic to submit the bug report
-        // You can use the 'bugDescription' state variable here
-        // For simplicity, we are just closing the modal in this example
         setBugDescription('');
         handleCloseBugReportModal();
     };
 
-  return (
-    <div>
-        <Navbar bg="light" expand="lg">
-        <Navbar.Brand href="/voting-pywer" style = {{marginLeft: '17px'}}>Voting Pywer</Navbar.Brand>
-        <Navbar.Toggle aria-controls="navbarNav" />
-        <Navbar.Collapse id="navbarNav">
-            <Nav className="mr-auto">
-            <Nav.Link href="#/about">About</Nav.Link>
-            </Nav>
-            <Nav>
-            <NavDropdown title="Settings" id="basic-nav-dropdown">
-                <NavDropdown.Item onClick={handlePrint}>Print</NavDropdown.Item>
-                <NavDropdown.Item onClick={handleBugReportClick}>Report Bug</NavDropdown.Item>
-            </NavDropdown>
-            </Nav>
-        </Navbar.Collapse>
-        </Navbar>
+    return (
+        <div>
+            <Navbar bg="light" className="navbar">
+                <Navbar.Brand href="/voting-pywer" className="navbar-brand">Voting Pywer</Navbar.Brand>
+                <Nav className="mr-auto">
+                    <Nav.Link href="#/about" className="nav-link">About</Nav.Link>
+                </Nav>
+                <Nav>
+                    <NavDropdown title="Settings" id="basic-nav-dropdown">
+                        <NavDropdown.Item onClick={handlePrint} className="nav-dropdown-item">Print</NavDropdown.Item>
+                        <NavDropdown.Item onClick={handleBugReportClick} className="nav-dropdown-item">Report Bug</NavDropdown.Item>
+                    </NavDropdown>
+                </Nav>
+            </Navbar>
 
-      <Modal show={showBugReportModal} onHide={handleCloseBugReportModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Report Bug</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group controlId="bugDescription">
-              <Form.Label>Brief Description of the Bug</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter bug description"
-                value={bugDescription}
-                onChange={handleBugDescriptionChange}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseBugReportModal}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleSubmitBugReport}>
-            Submit
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-    </div>
-  );
+            <Modal show={showBugReportModal} onHide={handleCloseBugReportModal}>
+                <Modal.Header closeButton className="modal-header">
+                    <Modal.Title className="modal-title">Report Bug</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="modal-body">
+                    <Form>
+                        <Form.Group controlId="bugDescription">
+                            <Form.Label>Brief Description of the Bug</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Enter bug description"
+                                value={bugDescription}
+                                onChange={handleBugDescriptionChange}
+                                className="form-control"
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseBugReportModal}>
+                        Close
+                    </Button>
+                    <Button variant="primary" onClick={handleSubmitBugReport} className="btn-primary">
+                        Submit
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </div>
+    );
 };
 
 export default HeaderComponent;
