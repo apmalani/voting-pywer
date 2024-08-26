@@ -1,0 +1,35 @@
+.about-content {
+    max-width: 809px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.about-content h3 {
+    margin-top: 0;
+    font-size: 2rem;
+    color: #000;
+}
+
+.about-content p {
+    line-height: 1.6;
+    margin: 1rem 0;
+}
+
+.about-content a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.about-content a:hover {
+    text-decoration: underline;
+}
+
+.about-content h5 {
+    margin-top: 1.5rem;
+    font-size: 1.25rem;
+    color: #000;
+}
+
+strong {
+    font-weight: bold;
+}
