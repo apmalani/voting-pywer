@@ -34,6 +34,7 @@
   vertical-align: middle;
   border: none;
   padding: 10px;
+  height: 55px;
 }
 
 .player-table thead th {
@@ -50,13 +51,16 @@
   background-color: #f8f9fa;
 }
 
-.input-right {
+.input-right, .small-input {
   width: 70px;
+  height: 34px;
   border: 1px solid #ced4da;
   border-radius: 4px;
   padding: 5px;
-  text-align: center; /* Center the text in the input */
-  font-size: 1rem; /* Ensure font size matches the table */
+  text-align: center;
+  font-size: 1rem;
+  margin: 0 auto;
+  display: block;
 }
 
 .table-footer {
@@ -66,24 +70,13 @@
   padding: 15px;
   background-color: #f8f9fa;
   border-top: 1px solid #e0e0e0;
+  height: 50px;
 }
 
 .quota-input {
   display: flex;
   align-items: center;
-}
-
-.quota-input label {
-  margin-right: 10px;
-}
-
-.small-input {
-  width: 70px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  padding: 5px;
-  text-align: center; /* Center the text in the input */
-  font-size: 1rem; /* Ensure font size matches the table */
+  height: 50px;
 }
 
 .btn-danger {
@@ -106,11 +99,12 @@
 .form-group {
   display: flex;
   align-items: center;
+  margin-bottom: 0;
 }
 
 .form-group .form-label {
   margin-right: 10px;
-  min-width: 60px; /* Adjust this value to fit your needs */
+  min-width: 60px;
 }
 
 .small-input {
